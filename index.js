@@ -4,7 +4,7 @@ var util     = require('util');
 var request  = require('request');
 var libxmljs = require("libxmljs");
 
-var apidmn  = "feed.linksynergy.com";
+var apidmn  = "productsearch.linksynergy.com";
 
 var token = undefined;
 
@@ -21,10 +21,15 @@ exports.query = function(params, done) {
     
     var qryobj = {
         token: token,
-        keyword: params.keyword,
-        sort: params.sort,
-        sorttype: params.sorttype
+        keyword: params.keyword
     };
+    
+    if (params.category)   qryobj.cat        = params.category;
+    if (params.sorttype)   qryobj.sorttype   = params.sorttype;
+    if (params.sort)       qryobj.sort       = params.sort;
+    if (params.MaxResults) qryobj.MaxResults = params.MaxResults;
+    if (params.pagenumber) qryobj.pagenumber = params.pagenumber;
+    if (params.mid)        qryobj.mid        = params.mid;
     
     var requrl = url.format({
         protocol: "http",
@@ -32,14 +37,14 @@ exports.query = function(params, done) {
         pathname: "/productsearch",
         query: qryobj
     });
-    util.log("REQUEST URL: " + requrl);
+    // util.log("REQUEST URL: " + requrl);
     
     request({
         method: 'GET',
         uri: requrl
     }, function(error, response, body) {
-        if (error) throw error;
-        util.log('RESULT ' + body);
+        if (error) { done(error); return; }
+        // util.log('RESULT ' + body);
         var xmlDoc = libxmljs.parseXmlString(body);
         var doc = xmlDoc.root();
         var children = xmlDoc.root().childNodes();
