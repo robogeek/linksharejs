@@ -26,6 +26,10 @@ exports.query = function(params, done) {
         keyword: params.keyword
     };
     
+    qryobj.sort       = "price"; // default
+    qryobj.sorttype   = "asc";   // default
+    qryobj.MaxResults = "100";   // default
+    qryobj.pagenumber = "1";     // default
     if (params.category)   qryobj.cat        = params.category;
     if (params.sorttype)   qryobj.sorttype   = params.sorttype;
     if (params.sort)       qryobj.sort       = params.sort;
@@ -49,32 +53,37 @@ exports.query = function(params, done) {
         // util.log('RESULT ' + body);
         var xmlDoc = libxmljs.parseXmlString(body);
         var doc = xmlDoc.root();
+        // util.log(util.inspect(doc));
+        // util.log('TotalMatches ' + util.inspect(doc.get('//TotalMatches')));
+        // util.log('TotalPages ' + util.inspect(doc.get('//TotalPages')));
+        // util.log('PageNumber ' + util.inspect(doc.get('//PageNumber')));
         var children = xmlDoc.root().childNodes();
         var res = {
-            matches: doc.get('//TotalMatches').text(),
-            pages: doc.get('//TotalPages').text(),
-            pagenum: doc.get('//PageNumber').text(),
+            matches: doc && doc.get('//TotalMatches') ? doc.get('//TotalMatches').text() : 0,
+            pages: doc && doc.get('//TotalPages') ? doc.get('//TotalPages').text() : 0,
+            pagenum: doc && doc.get('//PageNumber') ? doc.get('//PageNumber').text() : -1,
             items: []
         }
+        // util.log(util.inspect(res));
         children.forEach(function(child) {
-            // util.log(inspectElement(child));
+            // util.log(util.inspect(child));
             res.items.push({
-                merchantid: child.get('//mid').text(),
-                merchant: child.get('//merchantname').text(),
-                linkid: child.get('//linkid').text(),
-                createdon: child.get('//createdon').text(),
-                sku: child.get('//sku').text(),
-                productname: child.get('//productname').text(),
-                categoryprimary: child.get('//category/primary').text(),
-                categorysecondary: child.get('//category/secondary').text(),
-                price: child.get('//price').text(),
-                currency: child.get('//price').attr('currency').value(),
-                upccode: child.get('//upccode').text(),
-                descriptionshort: child.get('//description/short').text(),
-                descriptionlong: child.get('//description/long').text(),
-                keywords: child.get('//keywords').text(),
-                linkurl: child.get('//linkurl').text(),
-                imageurl: child.get('//imageurl').text()
+                merchantid: child.get('//mid') ? child.get('//mid').text() : "",
+                merchant: child.get('//merchantname') ? child.get('//merchantname').text() : "",
+                linkid: child.get('//linkid') ? child.get('//linkid').text() : "",
+                createdon: child.get('//createdon') ? child.get('//createdon').text() : "",
+                sku: child.get('//sku') ? child.get('//sku').text() : "",
+                productname: child.get('//productname') ? child.get('//productname').text() : "",
+                categoryprimary: child.get('//category/primary') ? child.get('//category/primary').text() : "",
+                categorysecondary: child.get('//category/secondary') ? child.get('//category/secondary').text() : "",
+                price: child.get('//price') ? child.get('//price').text() : "",
+                currency: child.get('//price') && child.get('//price').attr('currency') ? child.get('//price').attr('currency').value() : "",
+                upccode: child.get('//upccode') ? child.get('//upccode').text() : "",
+                descriptionshort: child.get('//description/short') ? child.get('//description/short').text() : "",
+                descriptionlong: child.get('//description/long') ? child.get('//description/long').text() : "",
+                keywords: child.get('//keywords') ? child.get('//keywords').text() : "",
+                linkurl: child.get('//linkurl') ? child.get('//linkurl').text() : "",
+                imageurl: child.get('//imageurl') ? child.get('//imageurl').text() : ""
             });
         });
         done(null, res);
