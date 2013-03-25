@@ -11,6 +11,13 @@ exports.setup = function(_token) {
     token = _token;
 }
 
+var findChild = function(elem, tagname) {
+    for (var i = 0, child = elem.child(i); child; i++, child = elem.child(i)) {
+        if (child.name() === tagname) return child;
+    }
+    return undefined;
+}
+
 /**
  * Queries for products.
  **/
@@ -59,33 +66,49 @@ exports.query = function(params, done) {
         // util.log('PageNumber ' + util.inspect(doc.get('//PageNumber')));
         var children = xmlDoc.root().childNodes();
         var res = {
-            matches: doc && doc.get('//TotalMatches') ? doc.get('//TotalMatches').text() : 0,
-            pages: doc && doc.get('//TotalPages') ? doc.get('//TotalPages').text() : 0,
-            pagenum: doc && doc.get('//PageNumber') ? doc.get('//PageNumber').text() : -1,
+            matches: findChild(doc, 'TotalMatches') ? findChild(doc, 'TotalMatches').text() : 0,
+            pages: findChild(doc, 'TotalPages') ? findChild(doc, 'TotalPages').text() : 0,
+            pagenum: findChild(doc, 'PageNumber') ? findChild(doc, 'PageNumber').text() : -1,
             items: []
         }
         // util.log(util.inspect(res));
-        children.forEach(function(child) {
-            // util.log(util.inspect(child));
+        for (var i = 0, child = doc.child(i); child; i++, child = doc.child(i)) {
+            if (child.name() !== "item") continue; // only looking for item's
+            // util.log(findChild(child, 'productname') ? findChild(child, 'productname').text() : "NF");
+            // util.log(findChild(child, 'description') ? findChild(child, 'description').text() : "NF");
+            // util.log(child.text());
+            var mid = findChild(child, 'mid');
+            var merchantname = findChild(child, 'merchantname');
+            var linkid = findChild(child, 'linkid');
+            var createdon = findChild(child, 'createdon');
+            var sku = findChild(child, 'sku');
+            var productname = findChild(child, 'productname');
+            var category = findChild(child, 'category');
+            var price = findChild(child, 'price');
+            var upccode = findChild(child, 'upccode');
+            var description = findChild(child, 'description');
+            var keywords = findChild(child, 'keywords');
+            var linkurl = findChild(child, 'linkurl');
+            var imageurl = findChild(child, 'imageurl');
             res.items.push({
-                merchantid: child.get('//mid') ? child.get('//mid').text() : "",
-                merchant: child.get('//merchantname') ? child.get('//merchantname').text() : "",
-                linkid: child.get('//linkid') ? child.get('//linkid').text() : "",
-                createdon: child.get('//createdon') ? child.get('//createdon').text() : "",
-                sku: child.get('//sku') ? child.get('//sku').text() : "",
-                productname: child.get('//productname') ? child.get('//productname').text() : "",
-                categoryprimary: child.get('//category/primary') ? child.get('//category/primary').text() : "",
-                categorysecondary: child.get('//category/secondary') ? child.get('//category/secondary').text() : "",
-                price: child.get('//price') ? child.get('//price').text() : "",
-                currency: child.get('//price') && child.get('//price').attr('currency') ? child.get('//price').attr('currency').value() : "",
-                upccode: child.get('//upccode') ? child.get('//upccode').text() : "",
-                descriptionshort: child.get('//description/short') ? child.get('//description/short').text() : "",
-                descriptionlong: child.get('//description/long') ? child.get('//description/long').text() : "",
-                keywords: child.get('//keywords') ? child.get('//keywords').text() : "",
-                linkurl: child.get('//linkurl') ? child.get('//linkurl').text() : "",
-                imageurl: child.get('//imageurl') ? child.get('//imageurl').text() : ""
+                merchantid: mid ? mid.text() : "",
+                merchant: merchantname ? merchantname.text() : "",
+                linkid: linkid ? linkid.text() : "",
+                createdon: createdon ? createdon.text() : "",
+                sku: sku ? sku.text() : "",
+                productname: productname ? productname.text() : "",
+                categoryprimary: category ? findChild(category, 'primary').text() : "",
+                categorysecondary: category ? findChild(category, 'secondary').text() : "",
+                price: price ? price.text() : "",
+                currency: price ? price.attr('currency').value() : "",
+                upccode: upccode ? upccode.text() : "",
+                descriptionshort: description ? findChild(description, 'short').text() : "",
+                descriptionlong: description ? findChild(description, 'long').text() : "",
+                keywords: keywords ? keywords.text() : "",
+                linkurl: linkurl ? linkurl.text() : "",
+                imageurl: imageurl ? imageurl.text() : ""
             });
-        });
+        }
         done(null, res);
     });
 };
