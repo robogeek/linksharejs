@@ -5,7 +5,41 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
+    
+<p align="center">
+<form method="post" action="/">
+  <p>Keyword: <input type='text' name='keyword' value='<%= typeof data.keyword !== "undefined" ? data.keyword : "" %>'/></p>
+  <p>Category: <input type='text' name='category' value='<%= typeof data.category !== "undefined" ? data.category : "" %>'/></p>
+  <p>Sort by: <input type="radio" name="sort" value="retailprice">Price
+              <input type="radio" name="sort" value="productname">Product Name
+              <input type="radio" name="sort" value="categoryname">Primary Category
+              <input type="radio" name="sort" value="mid">Merchant ID
+  </p>
+  <input type="hidden" name="sorttype" value="asc"/>
+  <p>Max Results: <input type='text' name='MaxResults' value='<%= typeof data.MaxResults !== "undefined" ? data.MaxResults : "" %>'/>
+     Page Number: <input type='text' name='pagenumber' value='<%= typeof data.pagenumber !== "undefined" ? data.pagenumber : "" %>'/>
+     Merchant ID: <input type='text' name='mid' value='<%= typeof data.mid !== "undefined" ? data.mid : "" %>'/>
+  </p>
+  <input type="submit" value="Query"/>
+</form>
+</p>
+
+
+<table width="100%" style="max-width: 100%">
+<% if (typeof data.items !== 'undefined') {
+data.items.forEach(function(item) { %>
+    <tr>
+        <th colspan=2><%= item.productname %></th><td><%= item.merchant %> (<%= item.merchantid %>)</td>
+    </tr>
+    <tr><td colspan=3><img src="<%= item.imageurl %>" align="right"><%- item.descriptionshort %></td></tr>
+    <tr><td colspan=3><%- item.descriptionlong %></td></tr>
+    <tr><td colspan=3><%= item.price %> currency: <%= item.currency %> </td></tr>
+    <tr><td colspan=3><a href="<%= item.linkurl%>"><%= item.linkurl %></a></td></tr>
+    <tr><td colspan=3>linkid: <%= item.linkid %> sku: <%= item.sku %> upccode: <%= item.upccode %> createdon: <%= item.createdon %> </td></tr>
+    <tr><td colspan=3>categoryprimary: <%= item.categoryprimary %> categorysecondary: <%= item.categorysecondary %></td></tr>
+    <tr><td colspan=3>keywords: <%= item.keywords %></td></tr>
+<% }); } %>
+</table>
+
   </body>
 </html>
